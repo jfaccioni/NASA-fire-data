@@ -17,7 +17,7 @@ def load_dataset(data_dir: str) -> Dict[str, pd.DataFrame]:
     """Loads dataset from zip files. Returns a dictionary in the format {instrument name: pandas DataFrame}"""
     dataset = {}
     instrument_names = ('MODIS', 'VIIRS')
-    zip_files = [z for z in os.listdir(data_dir) if z.endswith('.zip')]
+    zip_files = [os.path.join(data_dir, z) for z in os.listdir(data_dir) if z.endswith('.zip')]
     for instrument_name, zip_file in zip(instrument_names, zip_files):
         with ZipFile(zip_file) as zip_input:
             data = []
