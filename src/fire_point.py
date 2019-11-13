@@ -32,7 +32,7 @@ class FirePoint:
 
     def __repr__(self) -> str:
         """String representation of a FirePoint instance"""
-        return f'FirePoint(date={self.date}, point={self.point}, instrument={self.instrument}, radius={self.radius}'
+        return f'FirePoint(date={self.date}, point={self.point}, instrument={self.instrument}, radius={self.radius})'
 
     def convert_to_datetime(self, day: str, time: int) -> datetime:
         """Converts a day (YYYY-MM-DD) and time (UTC int) into a datetime object"""
