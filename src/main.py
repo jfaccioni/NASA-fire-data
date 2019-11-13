@@ -11,21 +11,33 @@ import seaborn as sns
 from src.utils import ignore_pandas_warning
 
 
-def main(data_dir: str = 'data') -> None:
+def main(input_dir: str = 'data', output_dir: str = 'output', plot_data: bool = True, save_data: bool = False) -> None:
     """Main function of NASA fire data module"""
-    print('loading dataset...')
-    dataset = load_dataset(data_dir=data_dir)
-    print('analysing dataset...')
-    analyse_dataset(dataset=dataset)
-    print('plotting dataset...')
+    # Loads input data
+    print('loading all data...')
+    dataset = load_dataset(input_dir=input_dir)
+    # Iterates over DataFrames and analyse each DataFrame individually
+    for name, df in dataset.items():
+        print(f'organizing dataset {name}...')
+        add_dates(df=df)
+        print(f'filtering dataset {name}...')
+        df = filter_dataset(df=df)
+        if plot_data is True:
+            print(f'plotting dataset {name}...')
+            plot_dataset(df=df, name=name)
+        if save_data is True:
+            print(f'saving dataset {name}...')
+            save_dataset(df=df, name=name, output_dir=output_dir)
+    # Shows resulting plots on the screen
+    print('showing all data...')
     plt.show()
 
 
-def load_dataset(data_dir: str) -> Dict[str, pd.DataFrame]:
+def load_dataset(input_dir: str) -> Dict[str, pd.DataFrame]:
     """Loads dataset from zip files. Returns a dictionary in the format {instrument name: pandas DataFrame}"""
     dataset = {}
     instrument_names = ('MODIS', 'VIIRS')
-    zip_files = [os.path.join(data_dir, z) for z in os.listdir(data_dir) if z.endswith('.zip')]
+    zip_files = [os.path.join(input_dir, z) for z in os.listdir(input_dir) if z.endswith('.zip')]
     for instrument_name, zip_file in zip(instrument_names, zip_files):
         with ZipFile(zip_file) as zip_input:
             dataset[instrument_name] = load_csvs_from_zip_file(zip_file=zip_input)
@@ -43,21 +55,10 @@ def load_csvs_from_zip_file(zip_file: ZipFile) -> pd.DataFrame:
     return pd.concat(data, sort=False, ignore_index=True)
 
 
-def analyse_dataset(dataset: Dict[str, pd.DataFrame]) -> None:
-    """Analyses dataset by calling analytical downstream functions"""
-    for name, data in dataset.items():
-        data = filter_above_percentile(df=data, column_name='frp', percentile=99.9)
-        for func in (add_year_values, add_month_values, add_month_names):
-            func(df=data, date_col='acq_date')
-        sns.relplot(x='longitude', y='latitude', hue='year', data=data.sort_values(by='frp'))
-        plt.title(name)
-
-
-def filter_above_percentile(df: pd.DataFrame, column_name: str, percentile: float) -> pd.DataFrame:
-    """Filters a DataFrame by selecting rows whose values in the column_name column belong to the top percentile,
-    based on the percentile argument"""
-    cutoff_value = np.percentile(df[column_name], percentile)
-    return df.loc[df[column_name] > cutoff_value]
+def add_dates(df: pd.DataFrame) -> None:
+    """Calls methods related to adding date columns to the DataFrame"""
+    for func in (add_year_values, add_month_values, add_month_names):
+        func(df=df, date_col='acq_date')
 
 
 @ignore_pandas_warning
@@ -76,6 +77,29 @@ def add_month_values(df: pd.DataFrame, date_col: str) -> None:
 def add_month_names(df: pd.DataFrame, date_col: str) -> None:
     """Adds month_name column to DataFrame based on a date string column formatted as YYYY-MM-DD"""
     df['month_name'] = df[date_col].apply(lambda x: month_abbr[int(x.split('-')[1])])
+
+
+def filter_dataset(df: pd.DataFrame) -> pd.DataFrame:
+    """Analyses dataset by calling analytical downstream functions"""
+    return filter_above_percentile(df=df, column_name='frp', percentile=99.9)
+
+
+def filter_above_percentile(df: pd.DataFrame, column_name: str, percentile: float) -> pd.DataFrame:
+    """Filters a DataFrame by selecting rows whose values in the column_name column belong to the top percentile,
+    based on the percentile argument"""
+    cutoff_value = np.percentile(df[column_name], percentile)
+    return df.loc[df[column_name] > cutoff_value]
+
+
+def plot_dataset(df: pd.DataFrame, name: str) -> None:
+    """Plots DataFrame values of longitude x latitude as a scatter plot"""
+    sns.relplot(x='longitude', y='latitude', hue='year', data=df.sort_values(by='frp'))
+    plt.title(name)
+
+
+def save_dataset(df: pd.DataFrame, name: str, output_dir: str) -> None:
+    """Saves DataFrame to a csv file in the specified output directory"""
+    df.to_csv(os.path.join(output_dir, f'{name}.csv'), index=False)
 
 
 if __name__ == '__main__':
