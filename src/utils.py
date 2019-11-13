@@ -1,9 +1,10 @@
 from pandas import options
+from typing import Any, Callable
 
 
-def ignore_pandas_warning(func):
+def ignore_pandas_warning(func: Callable) -> Callable:
     """Decorator that ignores pandas SettingWithCopyWarning during the decorated function's execution"""
-    def f(*args, **kwargs):
+    def f(*args, **kwargs) -> Any:
         """Placeholder for the function called by the ignore_pandas_warning decorator"""
         options.mode.chained_assignment = None
         return_value = func(*args, **kwargs)

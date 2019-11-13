@@ -12,12 +12,10 @@ from src.fire_point import FirePoint
 from src.settings import SETTINGS
 from src.utils import ignore_pandas_warning
 
-USE_SETTINGS = True
 
-
-def main(input_dir: str = 'data', output_dir: str = 'output', apply_filter: bool = True, column_to_filter: str = 'frp',
-         filter_percentile: float = 90, analyse_top_frp: bool = True, plot_data: bool = True,
-         save_data: bool = False) -> None:
+def main(input_dir: str, output_dir: str, percentile_filter: bool, percentile_column: str, cutoff_percentile: float,
+         value_filter: bool, value_column: str, cutoff_value: float, analyse_top_frp: bool, plot_data: bool,
+         save_data: bool) -> None:
     """Main function of NASA fire data module"""
     # Loads input data
     print('loading all data...')
@@ -26,9 +24,13 @@ def main(input_dir: str = 'data', output_dir: str = 'output', apply_filter: bool
     for name, df in dataset.items():
         print(f'Adding date columns to dataset {name}...')
         add_dates(df=df)
-        if apply_filter is True:
-            print(f'filtering dataset {name}...')
-            df = filter_dataset(df=df, column_name=column_to_filter, percentile=filter_percentile)
+        if value_filter is True:
+            print(f'filtering dataset {name} by {value_column} > {cutoff_value} ...')
+            df = filter_dataset_by_value(df=df, value_column=value_column, cutoff_value=cutoff_value)
+        if percentile_filter is True:
+            print(f'filtering dataset {name} by {percentile_column} > {cutoff_percentile} percentile...')
+            df = filter_dataset_by_percentile(df=df, percentile_column=percentile_column,
+                                              cutoff_percentile=cutoff_percentile)
         if analyse_top_frp is True:
             print(f'analysing top frp for dataset {name}...')
             analyse_dataset_frp(df=df)
@@ -89,16 +91,16 @@ def add_month_names(df: pd.DataFrame, date_col: str) -> None:
     df['month_name'] = df[date_col].apply(lambda x: month_abbr[int(x.split('-')[1])])
 
 
-def filter_dataset(df: pd.DataFrame, column_name: str, percentile: float) -> pd.DataFrame:
-    """Analyses dataset by calling analytical downstream functions"""
-    return filter_above_percentile(df=df, column_name=column_name, percentile=percentile)
+def filter_dataset_by_value(df: pd.DataFrame, value_column: str, cutoff_value: float) -> pd.DataFrame:
+    """Filters a DataFrame by selecting rows whose values in the column_name column are above the value_cutoff"""
+    return df.loc[df[value_column] > cutoff_value]
 
 
-def filter_above_percentile(df: pd.DataFrame, column_name: str, percentile: float) -> pd.DataFrame:
+def filter_dataset_by_percentile(df: pd.DataFrame, percentile_column: str, cutoff_percentile: float) -> pd.DataFrame:
     """Filters a DataFrame by selecting rows whose values in the column_name column belong to the top percentile,
     based on the percentile argument"""
-    cutoff_value = np.percentile(df[column_name], percentile)
-    return df.loc[df[column_name] > cutoff_value]
+    cutoff_value = np.percentile(df[percentile_column], cutoff_percentile)
+    return df.loc[df[percentile_column] > cutoff_value]
 
 
 def analyse_dataset_frp(df: pd.DataFrame) -> None:
@@ -127,7 +129,4 @@ def save_dataset(df: pd.DataFrame, name: str, output_dir: str) -> None:
 
 
 if __name__ == '__main__':
-    if USE_SETTINGS:
-        main(**SETTINGS)
-    else:
-        main()
+    main(**SETTINGS)
