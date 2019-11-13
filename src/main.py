@@ -1,13 +1,14 @@
-from zipfile import ZipFile
 import os
-from typing import Dict
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 from calendar import month_abbr
+from typing import Dict
+from zipfile import ZipFile
 
-pd.options.mode.chained_assignment = None
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+
+from src.utils import ignore_pandas_warning
 
 
 def main(data_dir: str = 'data') -> None:
@@ -59,16 +60,19 @@ def filter_above_percentile(df: pd.DataFrame, column_name: str, percentile: floa
     return df.loc[df[column_name] > cutoff_value]
 
 
+@ignore_pandas_warning
 def add_year_values(df: pd.DataFrame, date_col: str) -> None:
     """Adds year column to DataFrame based on a date string column formatted as YYYY-MM-DD"""
     df['year'] = df[date_col].apply(lambda x: int(x.split('-')[0]))
 
 
+@ignore_pandas_warning
 def add_month_values(df: pd.DataFrame, date_col: str) -> None:
     """Adds month column to DataFrame based on a date string column formatted as YYYY-MM-DD"""
     df['month'] = df[date_col].apply(lambda x: int(x.split('-')[1]))
 
 
+@ignore_pandas_warning
 def add_month_names(df: pd.DataFrame, date_col: str) -> None:
     """Adds month_name column to DataFrame based on a date string column formatted as YYYY-MM-DD"""
     df['month_name'] = df[date_col].apply(lambda x: month_abbr[int(x.split('-')[1])])
