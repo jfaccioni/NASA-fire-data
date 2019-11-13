@@ -11,5 +11,7 @@ numpy = "*"
 matplotlib = "*"
 seaborn = "*"
 nasa-fire-data = {editable = true,path = "."}
+geopy = "*"
+ipython = "*"
 
 [requires]
