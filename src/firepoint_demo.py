@@ -1,6 +1,6 @@
 import pandas as pd
 from random import randint
-from src.firepoint import FirePoint
+from src.fire_point import FirePoint
 from geopy import distance
 
 

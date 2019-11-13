@@ -2,9 +2,10 @@
 SETTINGS = {
     'input_dir': 'data',
     'output_dir': 'output',
-    'apply_filter': True,
+    'apply_filter': False,
     'column_to_filter': 'frp',
     'filter_percentile': 90,
-    'plot_data': True,
-    'save_data': True
+    'analyse_top_frp': True,
+    'plot_data': False,
+    'save_data': False
 }

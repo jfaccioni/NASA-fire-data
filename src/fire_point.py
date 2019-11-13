@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from geopy import Point, distance
 from datetime import datetime
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 class FirePoint:
@@ -18,6 +23,12 @@ class FirePoint:
         self.point = Point(latitude=latitude, longitude=longitude)
         self.instrument = instrument
         self.radius = self.pixel_size[self.instrument]
+
+    @classmethod
+    def from_dataset_row(cls, row: pd.Series) -> FirePoint:
+        """Alternative constructor for instantiating a FirePoint from a row of NASA's dataset"""
+        return cls(instrument=row.instrument, day=row.acq_date, time=row.acq_time, latitude=row.latitude,
+                   longitude=row.longitude)
 
     def __repr__(self) -> str:
         """String representation of a FirePoint instance"""

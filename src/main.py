@@ -8,25 +8,30 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from src.utils import ignore_pandas_warning
+from src.fire_point import FirePoint
 from src.settings import SETTINGS
+from src.utils import ignore_pandas_warning
 
 USE_SETTINGS = True
 
 
 def main(input_dir: str = 'data', output_dir: str = 'output', apply_filter: bool = True, column_to_filter: str = 'frp',
-         filter_percentile: float = 90, plot_data: bool = True, save_data: bool = True) -> None:
+         filter_percentile: float = 90, analyse_top_frp: bool = True, plot_data: bool = True,
+         save_data: bool = False) -> None:
     """Main function of NASA fire data module"""
     # Loads input data
     print('loading all data...')
     dataset = load_dataset(input_dir=input_dir)
     # Iterates over DataFrames and analyse each DataFrame individually
     for name, df in dataset.items():
-        print(f'organizing dataset {name}...')
+        print(f'Adding date columns to dataset {name}...')
         add_dates(df=df)
         if apply_filter is True:
             print(f'filtering dataset {name}...')
             df = filter_dataset(df=df, column_name=column_to_filter, percentile=filter_percentile)
+        if analyse_top_frp is True:
+            print(f'analysing top frp for dataset {name}...')
+            analyse_dataset_frp(df=df)
         if plot_data is True:
             print(f'plotting dataset {name}...')
             plot_dataset(df=df, name=name)
@@ -94,6 +99,20 @@ def filter_above_percentile(df: pd.DataFrame, column_name: str, percentile: floa
     based on the percentile argument"""
     cutoff_value = np.percentile(df[column_name], percentile)
     return df.loc[df[column_name] > cutoff_value]
+
+
+def analyse_dataset_frp(df: pd.DataFrame) -> None:
+    """Analyses dataset top frp points"""
+    top_frp_df = df.sort_values(by='frp').tail(10)
+    for index, row in top_frp_df.iterrows():
+        close_points = []
+        p = FirePoint.from_dataset_row(row=row)
+        for i, r in df.iterrows():
+            pp = FirePoint.from_dataset_row(row=r)
+            if p.is_neighbor_of(pp, time_delta=30, distance_delta=10):
+                close_points.append(pp)
+        print(f'Top FRP point {p} has {len(close_points)} close points:')
+        print(close_points)
 
 
 def plot_dataset(df: pd.DataFrame, name: str) -> None:
