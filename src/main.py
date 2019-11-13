@@ -9,9 +9,13 @@ import pandas as pd
 import seaborn as sns
 
 from src.utils import ignore_pandas_warning
+from src.settings import SETTINGS
+
+USE_SETTINGS = True
 
 
-def main(input_dir: str = 'data', output_dir: str = 'output', plot_data: bool = True, save_data: bool = False) -> None:
+def main(input_dir: str = 'data', output_dir: str = 'output', apply_filter: bool = True, column_to_filter: str = 'frp',
+         filter_percentile: float = 90, plot_data: bool = True, save_data: bool = True) -> None:
     """Main function of NASA fire data module"""
     # Loads input data
     print('loading all data...')
@@ -20,8 +24,9 @@ def main(input_dir: str = 'data', output_dir: str = 'output', plot_data: bool = 
     for name, df in dataset.items():
         print(f'organizing dataset {name}...')
         add_dates(df=df)
-        print(f'filtering dataset {name}...')
-        df = filter_dataset(df=df)
+        if apply_filter is True:
+            print(f'filtering dataset {name}...')
+            df = filter_dataset(df=df, column_name=column_to_filter, percentile=filter_percentile)
         if plot_data is True:
             print(f'plotting dataset {name}...')
             plot_dataset(df=df, name=name)
@@ -79,9 +84,9 @@ def add_month_names(df: pd.DataFrame, date_col: str) -> None:
     df['month_name'] = df[date_col].apply(lambda x: month_abbr[int(x.split('-')[1])])
 
 
-def filter_dataset(df: pd.DataFrame) -> pd.DataFrame:
+def filter_dataset(df: pd.DataFrame, column_name: str, percentile: float) -> pd.DataFrame:
     """Analyses dataset by calling analytical downstream functions"""
-    return filter_above_percentile(df=df, column_name='frp', percentile=99.9)
+    return filter_above_percentile(df=df, column_name=column_name, percentile=percentile)
 
 
 def filter_above_percentile(df: pd.DataFrame, column_name: str, percentile: float) -> pd.DataFrame:
@@ -103,4 +108,7 @@ def save_dataset(df: pd.DataFrame, name: str, output_dir: str) -> None:
 
 
 if __name__ == '__main__':
-    main()
+    if USE_SETTINGS:
+        main(**SETTINGS)
+    else:
+        main()
