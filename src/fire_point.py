@@ -24,21 +24,15 @@ class FirePoint:
         self.instrument = instrument
         self.radius = self.pixel_size[self.instrument]
 
-    @classmethod
-    def from_dataset_row(cls, row: pd.Series) -> FirePoint:
-        """Alternative constructor for instantiating a FirePoint from a row of NASA's dataset"""
-        return cls(instrument=row.instrument, day=row.acq_date, time=row.acq_time, latitude=row.latitude,
-                   longitude=row.longitude)
-
     def __repr__(self) -> str:
         """String representation of a FirePoint instance"""
         return f'FirePoint(date={self.date}, point={self.point}, instrument={self.instrument}, radius={self.radius})'
 
     def convert_to_datetime(self, day: str, time: int) -> datetime:
-        """Converts a day (YYYY-MM-DD) and time (UTC int) into a datetime object"""
+        """Converts a day (YYYY-MM-DD) and time (UTC integer) into a datetime object"""
         year, month, day = [int(d) for d in day.split('-')]
         hour = self.hour_from_utc_integer(time=time)
-        minute = int(str(time)[-2:])
+        minute = int(str(time)[-2:])  # last two digits
         return datetime(year=year, month=month, day=day, hour=hour, minute=minute)
 
     @staticmethod
@@ -46,8 +40,8 @@ class FirePoint:
         """Returns the number of hours from an UTC integer"""
         time_str = str(time)
         try:
-            return int(time_str[:len(time_str)-2])
-        except ValueError:
+            return int(time_str[:len(time_str)-2])  # digits after excluding two last digits
+        except ValueError:  # no digits left - hour is zero
             return 0
 
     def is_neighbor_of(self, other: FirePoint, time_delta: float, distance_delta: float):
@@ -64,3 +58,9 @@ class FirePoint:
         """Returns whether two FirePoint instances are within a certain time interval from one another"""
         time_between_points = abs(self.date - other.date)  # in days
         return time_between_points.total_seconds() < (time_delta * 3600 * 24)
+
+    @classmethod
+    def from_dataset_row(cls, row: pd.Series) -> FirePoint:
+        """Alternative constructor for instantiating a FirePoint from a row of NASA's dataset"""
+        return cls(instrument=row.instrument, day=row.acq_date, time=row.acq_time, latitude=row.latitude,
+                   longitude=row.longitude)

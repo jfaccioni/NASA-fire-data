@@ -16,7 +16,7 @@ from src.utils import ignore_pandas_warning
 def main(input_dir: str, output_dir: str, percentile_filter: bool, percentile_column: str, cutoff_percentile: float,
          value_filter: bool, value_column: str, cutoff_value: float, analyse_top_frp: bool, plot_data: bool,
          save_data: bool) -> None:
-    """Main function of NASA fire data module"""
+    """Main function of NASA fire data module. Parameters are read from the dictionary in settings.py"""
     # Loads input data
     print('loading all data...')
     dataset = load_dataset(input_dir=input_dir)
@@ -57,7 +57,9 @@ def load_dataset(input_dir: str) -> Dict[str, pd.DataFrame]:
 
 
 def load_csvs_from_zip_file(zip_file: ZipFile) -> pd.DataFrame:
-    """Reads data from all csv files inside the input zip file and returns it as a concatenated pandas DataFrame"""
+    """Reads data from all csv files inside the input zip file and returns it as a concatenated pandas DataFrame.
+    This is necessary because, for each instrument, there are archive csv files (more than 3 months ago) and
+    near real time (nrt) files (data from less than 3 months ago, less confidence)."""
     data = []
     csv_files = [c for c in zip_file.namelist() if c.endswith('.csv')]
     for csv_file in csv_files:
@@ -73,19 +75,19 @@ def add_dates(df: pd.DataFrame) -> None:
         func(df=df, date_col='acq_date')
 
 
-@ignore_pandas_warning
+@ignore_pandas_warning  # ignores SettingWithCopyWarning
 def add_year_values(df: pd.DataFrame, date_col: str) -> None:
     """Adds year column to DataFrame based on a date string column formatted as YYYY-MM-DD"""
     df['year'] = df[date_col].apply(lambda x: int(x.split('-')[0]))
 
 
-@ignore_pandas_warning
+@ignore_pandas_warning  # ignores SettingWithCopyWarning
 def add_month_values(df: pd.DataFrame, date_col: str) -> None:
     """Adds month column to DataFrame based on a date string column formatted as YYYY-MM-DD"""
     df['month'] = df[date_col].apply(lambda x: int(x.split('-')[1]))
 
 
-@ignore_pandas_warning
+@ignore_pandas_warning  # ignores SettingWithCopyWarning
 def add_month_names(df: pd.DataFrame, date_col: str) -> None:
     """Adds month_name column to DataFrame based on a date string column formatted as YYYY-MM-DD"""
     df['month_name'] = df[date_col].apply(lambda x: month_abbr[int(x.split('-')[1])])
@@ -104,12 +106,12 @@ def filter_dataset_by_percentile(df: pd.DataFrame, percentile_column: str, cutof
 
 
 def analyse_dataset_frp(df: pd.DataFrame) -> None:
-    """Analyses dataset top frp points"""
-    top_frp_df = df.sort_values(by='frp').tail(10)
+    """Analyses dataset top FRP points"""
+    top_frp_df = df.sort_values(by='frp').tail(10)  # 10 highest FRP rows
     for index, row in top_frp_df.iterrows():
         close_points = []
         p = FirePoint.from_dataset_row(row=row)
-        for i, r in df.iterrows():
+        for i, r in df.iterrows():  # TODO: iterrows is too slow for this
             pp = FirePoint.from_dataset_row(row=r)
             if p.is_neighbor_of(pp, time_delta=30, distance_delta=10):
                 close_points.append(pp)
