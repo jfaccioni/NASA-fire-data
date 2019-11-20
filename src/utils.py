@@ -1,5 +1,6 @@
-from pandas import options
 from typing import Any, Callable
+
+from pandas import options
 
 
 def ignore_pandas_warning(func: Callable) -> Callable:

@@ -1,7 +1,9 @@
-import pandas as pd
 from random import randint
-from src.fire_point import FirePoint
+
+import pandas as pd
 from geopy import distance
+
+from src.fire_point import FirePoint
 
 
 def firepoint_demo(instrument: str = 'VIIRS'):
@@ -13,8 +15,7 @@ def firepoint_demo(instrument: str = 'VIIRS'):
     for point_number in points:
         p = randint(0, len(viirs))
         r = viirs.iloc[p]
-        fp = FirePoint(instrument=instrument, day=r.acq_date, time=r.acq_time, latitude=r.latitude,
-                       longitude=r.longitude)
+        fp = FirePoint(r.to_dict())
         points[point_number] = fp
     p1, p2 = points.values()
     print(f'FirePoint 1: {p1}')
@@ -23,8 +24,8 @@ def firepoint_demo(instrument: str = 'VIIRS'):
     print(f'Spatial Distance: {d.km} Km')
     t = abs(p1.date - p2.date)
     print(f'Temporal Distance: {t}')
-    max_dist = 2000  # Km
-    max_time = 3650  # Days
+    max_dist = 100  # Km
+    max_time = 365  # Days
     are_close = p1.is_neighbor_of(other=p2, distance_delta=max_dist, time_delta=max_time)
     print('Are they close?')
     print(f'Considering point within {max_dist} kilometers and {max_time} days as being close, '

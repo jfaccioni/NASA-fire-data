@@ -1,6 +1,6 @@
 import os
 from calendar import month_abbr
-from typing import Dict
+from typing import Dict, Generator, List, TYPE_CHECKING, Tuple, Optional
 from zipfile import ZipFile
 
 import matplotlib.pyplot as plt
@@ -12,11 +12,16 @@ from src.fire_point import FirePoint
 from src.settings import SETTINGS
 from src.utils import ignore_pandas_warning
 
+if TYPE_CHECKING:
+    from io import TextIOWrapper
+
 
 def main(input_dir: str, output_dir: str, percentile_filter: bool, percentile_column: str, cutoff_percentile: float,
-         value_filter: bool, value_column: str, cutoff_value: float, analyse_top_frp: bool, plot_data: bool,
-         save_data: bool) -> None:
-    """Main function of NASA fire data module. Parameters are read from the dictionary in settings.py"""
+         value_filter: bool, value_column: str, cutoff_value: float, analyse_column: str, top_row_number: int,
+         distance_cutoff: float, temporal_cutoff: float, analyse_to_stdout: bool, analyse_to_log: bool,
+         analyse_to_csv: bool, plot_data: bool, save_data: bool) -> None:
+    """Main function of NASA fire data module.
+    Parameters are read from the SETTINGS dictionary in the settings.py file"""
     # Loads input data
     print('loading all data...')
     dataset = load_dataset(input_dir=input_dir)
@@ -31,9 +36,12 @@ def main(input_dir: str, output_dir: str, percentile_filter: bool, percentile_co
             print(f'filtering dataset {name} by {percentile_column} > {cutoff_percentile} percentile...')
             df = filter_dataset_by_percentile(df=df, percentile_column=percentile_column,
                                               cutoff_percentile=cutoff_percentile)
-        if analyse_top_frp is True:
-            print(f'analysing top frp for dataset {name}...')
-            analyse_dataset_frp(df=df)
+        if any(cond is True for cond in [analyse_to_stdout, analyse_to_log, analyse_to_csv]):
+            print(f'analysing top rows for dataset {name}...')
+            analysis_loop(df=df, analyse_column=analyse_column, top_row_number=top_row_number,
+                          distance_cutoff=distance_cutoff, temporal_cutoff=temporal_cutoff,
+                          analyse_to_stdout=analyse_to_stdout, analyse_to_log=analyse_to_log,
+                          analyse_to_csv=analyse_to_csv)
         if plot_data is True:
             print(f'plotting dataset {name}...')
             plot_dataset(df=df, name=name)
@@ -105,18 +113,83 @@ def filter_dataset_by_percentile(df: pd.DataFrame, percentile_column: str, cutof
     return df.loc[df[percentile_column] > cutoff_value]
 
 
-def analyse_dataset_frp(df: pd.DataFrame) -> None:
-    """Analyses dataset top FRP points"""
-    top_frp_df = df.sort_values(by='frp').tail(10)  # 10 highest FRP rows
-    for index, row in top_frp_df.iterrows():
-        close_points = []
-        p = FirePoint.from_dataset_row(row=row)
-        for i, r in df.iterrows():  # TODO: iterrows is too slow for this
-            pp = FirePoint.from_dataset_row(row=r)
-            if p.is_neighbor_of(pp, time_delta=30, distance_delta=10):
-                close_points.append(pp)
-        print(f'Top FRP point {p} has {len(close_points)} close points:')
-        print(close_points)
+# noinspection PyTypeChecker
+def analysis_loop(df: pd.DataFrame, analyse_column: str, top_row_number: int, distance_cutoff: float,
+                  temporal_cutoff: float, analyse_to_stdout: bool, analyse_to_log: bool, analyse_to_csv: bool) -> None:
+    """Main analysis loop"""
+    log_path = os.path.join('output', 'results', 'log.txt')
+    csv_path = os.path.join('output', 'results', 'firepoints.csv')
+    with conditional_open(log_path, 'w', condition=analyse_to_log) as logfile, \
+            conditional_open(csv_path, 'w', condition=analyse_to_csv) as csvfile:
+        for top_point in yield_top_points(df=df, column_name=analyse_column, n=top_row_number):
+            close_points = get_close_points(df=df, top_point=top_point, distance_cutoff=distance_cutoff,
+                                            temporal_cutoff=temporal_cutoff)
+            if analyse_to_stdout:
+                to_stdout(top_point=top_point, close_points=close_points, distance_cutoff=distance_cutoff,
+                          temporal_cutoff=temporal_cutoff)
+                to_log(logfile=logfile, top_point=top_point, close_points=close_points, distance_cutoff=distance_cutoff,
+                       temporal_cutoff=temporal_cutoff)
+                to_csv(csvfile=csvfile, top_point=top_point, close_points=close_points)
+
+
+def conditional_open(filename, mode, condition: bool) -> Optional[TextIOWrapper]:
+    """Returns a file handle or None, based on the condition"""
+    pass  # return open(filename, mode) if condition else None
+
+
+def yield_top_points(df: pd.DataFrame, column_name: str, n: int) -> Generator[FirePoint, None, None]:
+    """Yields the top k rows from data as FirePoint instances, regarding values in the column_name column"""
+    top_df = df.sort_values(by=column_name).tail(n)
+    for _, row in top_df.iterrows():
+        yield FirePoint.from_dataset_row(row=row)
+
+
+def get_close_points(df: pd.DataFrame, top_point: FirePoint, distance_cutoff: float,
+                     temporal_cutoff: float) -> List[FirePoint]:
+    """Analyses dataset k top values by finding points closest to it"""
+    close_points = []
+    for index, row in df.iterrows():  # TODO: this is very slow, since we have to iterate over the whole dataset
+        candidate = FirePoint.from_dataset_row(row=row)
+        if top_point.is_neighbor_of(candidate, time_delta=temporal_cutoff, distance_delta=distance_cutoff):
+            close_points.append(candidate)
+    return close_points
+
+
+def to_stdout(top_point: FirePoint, close_points: List, distance_cutoff: float, temporal_cutoff: float) -> None:
+    """Outputs information for FirePoint and its close points to standard output"""
+    print(f'Top point: {top_point}')
+    print(f'Points within distance={distance_cutoff} km, time={temporal_cutoff} days: {len(close_points)}')
+    for point in close_points:
+        print(point)
+    print('\n')
+
+
+def to_log(logfile: Optional[TextIOWrapper], top_point: FirePoint, close_points: List, distance_cutoff: float,
+           temporal_cutoff: float) -> None:
+    """Outputs information for FirePoint and its close points to log file.
+    Returns early if the user chose not to do so"""
+    if logfile is None:
+        return
+    logfile.write(f'Top point: {top_point}')
+    logfile.write('\n')
+    logfile.write(f'Points within distance={distance_cutoff} km, time={temporal_cutoff} days: {len(close_points)}')
+    logfile.write('\n')
+    for point in close_points:
+        logfile.write(point)
+        logfile.write('\n')
+    logfile.write('\n')
+
+
+def to_csv(csvfile: Optional[TextIOWrapper], top_point: FirePoint, close_points: List) -> None:
+    """Outputs information for FirePoint and its close points to csv file.
+    Returns early if the user chose not to do so"""
+    if csvfile is None:
+        return
+    csvfile.write(top_point.as_csv_row(is_top_point=True))
+    csvfile.write('\n')
+    for point in close_points:
+        csvfile.write(point.as_csv_row(is_top_point=False))
+        csvfile.write('\n')
 
 
 def plot_dataset(df: pd.DataFrame, name: str) -> None:
