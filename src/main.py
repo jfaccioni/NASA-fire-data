@@ -129,6 +129,8 @@ def analysis_loop(df: pd.DataFrame, output_dir: str, analyse_column: str, top_ro
     csv_path = os.path.join(base_results_path, 'firepoints.csv')
     with conditional_open(log_path, 'w', condition=analyse_to_log) as logfile, \
             conditional_open(csv_path, 'w', condition=analyse_to_csv) as csvfile:
+        if csvfile is not None:
+            add_header(csvfile=csvfile)
         for top_point in yield_top_points(df=df, column_name=analyse_column, n=top_row_number):
             close_points = get_close_points(df=df, top_point=top_point, distance_cutoff=distance_cutoff,
                                             temporal_cutoff=temporal_cutoff)
@@ -150,6 +152,11 @@ def conditional_open(filename: str, mode: str, condition: bool) -> Optional[Text
         yield resource
     finally:
         resource.close()
+
+
+def add_header(csvfile: TextIOWrapper) -> None:
+    """Adds the first line (table header) to the output csv file"""
+    csvfile.write('frp,latitude,longitude,instrument,is_top_point\n')
 
 
 def yield_top_points(df: pd.DataFrame, column_name: str, n: int) -> Generator[FirePoint, None, None]:
