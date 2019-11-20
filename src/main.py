@@ -135,9 +135,9 @@ def analysis_loop(df: pd.DataFrame, output_dir: str, analyse_column: str, top_ro
             if analyse_to_stdout:
                 to_stdout(top_point=top_point, close_points=close_points, distance_cutoff=distance_cutoff,
                           temporal_cutoff=temporal_cutoff)
-                to_log(logfile=logfile, top_point=top_point, close_points=close_points, distance_cutoff=distance_cutoff,
-                       temporal_cutoff=temporal_cutoff)
-                to_csv(csvfile=csvfile, top_point=top_point, close_points=close_points)
+            to_log(logfile=logfile, top_point=top_point, close_points=close_points, distance_cutoff=distance_cutoff,
+                   temporal_cutoff=temporal_cutoff)
+            to_csv(csvfile=csvfile, top_point=top_point, close_points=close_points)
 
 
 @contextmanager
@@ -179,8 +179,8 @@ def to_stdout(top_point: FirePoint, close_points: List, distance_cutoff: float, 
     print('\n')
 
 
-def to_log(logfile: Optional[TextIOWrapper], top_point: FirePoint, close_points: List, distance_cutoff: float,
-           temporal_cutoff: float) -> None:
+def to_log(logfile: Optional[TextIOWrapper], top_point: FirePoint, close_points: List[FirePoint],
+           distance_cutoff: float, temporal_cutoff: float) -> None:
     """Outputs information for FirePoint and its close points to log file.
     Returns early if the user chose not to do so"""
     if logfile is None:
@@ -190,12 +190,12 @@ def to_log(logfile: Optional[TextIOWrapper], top_point: FirePoint, close_points:
     logfile.write(f'Points within distance={distance_cutoff} km, time={temporal_cutoff} days: {len(close_points)}')
     logfile.write('\n')
     for point in close_points:
-        logfile.write(point)
+        logfile.write(str(point))
         logfile.write('\n')
     logfile.write('\n')
 
 
-def to_csv(csvfile: Optional[TextIOWrapper], top_point: FirePoint, close_points: List) -> None:
+def to_csv(csvfile: Optional[TextIOWrapper], top_point: FirePoint, close_points: List[FirePoint]) -> None:
     """Outputs information for FirePoint and its close points to csv file.
     Returns early if the user chose not to do so"""
     if csvfile is None:
