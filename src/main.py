@@ -142,7 +142,7 @@ def analysis_loop(df: pd.DataFrame, output_dir: str, analyse_column: str, top_ro
 
 @contextmanager
 def conditional_open(filename: str, mode: str, condition: bool) -> Optional[TextIOWrapper]:
-    """Returns a file handle or None, based on the condition"""
+    """Context manager for returning an open file or a None value, depending on the condition argument"""
     if not condition:
         yield None
     resource = open(filename, mode)
