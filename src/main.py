@@ -1,6 +1,7 @@
 import os
 from calendar import month_abbr
-from typing import Dict, Generator, List, TYPE_CHECKING, Tuple, Optional
+from contextlib import contextmanager
+from typing import Dict, Generator, List, Optional, TYPE_CHECKING
 from zipfile import ZipFile
 
 import matplotlib.pyplot as plt
@@ -132,9 +133,16 @@ def analysis_loop(df: pd.DataFrame, analyse_column: str, top_row_number: int, di
                 to_csv(csvfile=csvfile, top_point=top_point, close_points=close_points)
 
 
-def conditional_open(filename, mode, condition: bool) -> Optional[TextIOWrapper]:
+@contextmanager
+def conditional_open(filename: str, mode: str, condition: bool) -> Optional[TextIOWrapper]:
     """Returns a file handle or None, based on the condition"""
-    pass  # return open(filename, mode) if condition else None
+    if not condition:
+        yield None
+    resource = open(filename, mode)
+    try:
+        yield resource
+    finally:
+        resource.close()
 
 
 def yield_top_points(df: pd.DataFrame, column_name: str, n: int) -> Generator[FirePoint, None, None]:
