@@ -28,6 +28,8 @@ def main(input_dir: str, output_dir: str, percentile_filter: bool, percentile_co
     # Loads input data
     print('loading all data...')
     dataset = load_dataset(input_dir=input_dir)
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
     # Iterates over DataFrames and analyse each DataFrame individually
     for name, df in dataset.items():
         print(f'Adding date columns to dataset {name}...')
@@ -41,7 +43,7 @@ def main(input_dir: str, output_dir: str, percentile_filter: bool, percentile_co
                                               cutoff_percentile=cutoff_percentile)
         if any(cond is True for cond in [analyse_to_stdout, analyse_to_log, analyse_to_csv]):
             print(f'analysing top rows for dataset {name}...')
-            analysis_loop(df=df, analyse_column=analyse_column, top_row_number=top_row_number,
+            analysis_loop(df=df, output_dir=output_dir, analyse_column=analyse_column, top_row_number=top_row_number,
                           distance_cutoff=distance_cutoff, temporal_cutoff=temporal_cutoff,
                           analyse_to_stdout=analyse_to_stdout, analyse_to_log=analyse_to_log,
                           analyse_to_csv=analyse_to_csv)
@@ -117,10 +119,10 @@ def filter_dataset_by_percentile(df: pd.DataFrame, percentile_column: str, cutof
 
 
 # noinspection PyTypeChecker
-def analysis_loop(df: pd.DataFrame, analyse_column: str, top_row_number: int, distance_cutoff: float,
+def analysis_loop(df: pd.DataFrame, output_dir: str, analyse_column: str, top_row_number: int, distance_cutoff: float,
                   temporal_cutoff: float, analyse_to_stdout: bool, analyse_to_log: bool, analyse_to_csv: bool) -> None:
     """Main analysis loop"""
-    base_results_path = os.path.join('output', 'results')
+    base_results_path = os.path.join(output_dir, 'results')
     if not os.path.exists(base_results_path):
         os.mkdir(base_results_path)
     log_path = os.path.join(base_results_path, 'log.txt')
