@@ -15,9 +15,9 @@ SETTINGS = {
     'analyse_column': 'frp',    # column for sorting top values
     'top_row_number': 10,       # number of top FirePoints to analyse
     'distance_cutoff': 10,      # distance (in kilometers) for considering a FirePoint as being close to another
-    'time_cutoff': 30,          # time window (in days) for considering a FirePoint as being close to another
+    'temporal_cutoff': 30,          # time window (in days) for considering a FirePoint as being close to another
     'analyse_to_stdout': True,  # whether to print analysis results to standard output
-    'analyse_to_log': False,     # whether or not to write analysis results to a log file
+    'analyse_to_log': True,     # whether or not to write analysis results to a log file
     'analyse_to_csv': True,     # whether or not to write analysis results to a csv file
     # PLOTTING SETTINGS
     'plot_data': False,  # True for plotting data as a scatter plot (lon x lat)

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 from calendar import month_abbr
 from contextlib import contextmanager
@@ -118,8 +120,11 @@ def filter_dataset_by_percentile(df: pd.DataFrame, percentile_column: str, cutof
 def analysis_loop(df: pd.DataFrame, analyse_column: str, top_row_number: int, distance_cutoff: float,
                   temporal_cutoff: float, analyse_to_stdout: bool, analyse_to_log: bool, analyse_to_csv: bool) -> None:
     """Main analysis loop"""
-    log_path = os.path.join('output', 'results', 'log.txt')
-    csv_path = os.path.join('output', 'results', 'firepoints.csv')
+    base_results_path = os.path.join('output', 'results')
+    if not os.path.exists(base_results_path):
+        os.mkdir(base_results_path)
+    log_path = os.path.join(base_results_path, 'log.txt')
+    csv_path = os.path.join(base_results_path, 'firepoints.csv')
     with conditional_open(log_path, 'w', condition=analyse_to_log) as logfile, \
             conditional_open(csv_path, 'w', condition=analyse_to_csv) as csvfile:
         for top_point in yield_top_points(df=df, column_name=analyse_column, n=top_row_number):

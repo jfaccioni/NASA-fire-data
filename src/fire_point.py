@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Any
+from typing import Any, Dict, TYPE_CHECKING
 
 from geopy import Point, distance
 
