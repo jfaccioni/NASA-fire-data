@@ -1,6 +1,19 @@
+from contextlib import contextmanager
 from typing import Any, Callable
 
 from pandas import options
+
+
+@contextmanager
+def conditional_open(filename: str, mode: str, condition: bool) -> Optional[TextIOWrapper]:
+    """Context manager for returning an open file or a None value, depending on the condition argument"""
+    if not condition:
+        yield None
+    resource = open(filename, mode)
+    try:
+        yield resource
+    finally:
+        resource.close()
 
 
 def ignore_pandas_warning(func: Callable) -> Callable:

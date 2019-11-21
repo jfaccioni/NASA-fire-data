@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 from calendar import month_abbr
-from contextlib import contextmanager
 from typing import Dict, Generator, List, Optional, TYPE_CHECKING
 from zipfile import ZipFile
 
@@ -13,7 +12,7 @@ import seaborn as sns
 
 from src.fire_point import FirePoint
 from src.settings import SETTINGS
-from src.utils import ignore_pandas_warning
+from src.utils import conditional_open, ignore_pandas_warning
 
 if TYPE_CHECKING:
     from io import TextIOWrapper
@@ -140,18 +139,6 @@ def analysis_loop(df: pd.DataFrame, output_dir: str, analyse_column: str, top_ro
             to_log(logfile=logfile, top_point=top_point, close_points=close_points, distance_cutoff=distance_cutoff,
                    temporal_cutoff=temporal_cutoff)
             to_csv(csvfile=csvfile, top_point=top_point, close_points=close_points)
-
-
-@contextmanager
-def conditional_open(filename: str, mode: str, condition: bool) -> Optional[TextIOWrapper]:
-    """Context manager for returning an open file or a None value, depending on the condition argument"""
-    if not condition:
-        yield None
-    resource = open(filename, mode)
-    try:
-        yield resource
-    finally:
-        resource.close()
 
 
 def add_header(csvfile: TextIOWrapper) -> None:
