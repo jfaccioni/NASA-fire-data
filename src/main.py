@@ -180,7 +180,7 @@ def get_close_points(df: pd.DataFrame, top_point: FirePoint, distance_cutoff: fl
 def to_stdout(top_point: FirePoint, close_points: List, distance_cutoff: float, temporal_cutoff: float) -> None:
     """Outputs information for FirePoint and its close points to standard output"""
     print(f'Top point: {top_point}')
-    print(f'Points within distance={distance_cutoff} km, time={temporal_cutoff} days: {len(close_points)}')
+    print(f'{len(close_points)} points within distance={distance_cutoff} km, time= +-{temporal_cutoff} days:')
     for point in close_points:
         print(point)
     print('\n')
@@ -194,7 +194,7 @@ def to_log(logfile: Optional[TextIOWrapper], top_point: FirePoint, close_points:
         return
     logfile.write(f'Top point: {top_point}')
     logfile.write('\n')
-    logfile.write(f'Points within distance={distance_cutoff} km, time={temporal_cutoff} days: {len(close_points)}')
+    logfile.write(f'{len(close_points)} points within distance={distance_cutoff} km, time= +-{temporal_cutoff} days:')
     logfile.write('\n')
     for point in close_points:
         logfile.write(str(point))
