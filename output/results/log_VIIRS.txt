@@ -1,12 +1,12 @@
 Top point: FirePoint(frp=1322.5, coords=12 46' 0.66'' S 43 18' 47.7'' W, instrument=VIIRS)
-Points within distance=10 km, time=30 days: 4
+4 points within distance=10 km, time= +-30 days:
 FirePoint(frp=1322.5, coords=12 45' 58.644'' S 43 18' 33.732'' W, instrument=VIIRS)
 FirePoint(frp=1322.5, coords=12 45' 46.152'' S 43 18' 35.568'' W, instrument=VIIRS)
 FirePoint(frp=1322.5, coords=12 46' 0.66'' S 43 18' 47.7'' W, instrument=VIIRS)
 FirePoint(frp=558.1, coords=12 46' 2.676'' S 43 19' 1.632'' W, instrument=VIIRS)
 
 Top point: FirePoint(frp=1385.0, coords=9 14' 12.948'' S 65 21' 45.756'' W, instrument=VIIRS)
-Points within distance=10 km, time=30 days: 787
+787 points within distance=10 km, time= +-30 days:
 FirePoint(frp=3.9, coords=9 13' 45.408'' S 65 24' 47.232'' W, instrument=VIIRS)
 FirePoint(frp=3.9, coords=9 14' 8.52'' S 65 24' 51.732'' W, instrument=VIIRS)
 FirePoint(frp=4.5, coords=9 14' 15.756'' S 65 24' 14.364'' W, instrument=VIIRS)
@@ -796,7 +796,7 @@ FirePoint(frp=2.4, coords=9 14' 45.996'' S 65 25' 15.312'' W, instrument=VIIRS)
 FirePoint(frp=1.4, coords=9 13' 10.308'' S 65 22' 58.764'' W, instrument=VIIRS)
 
 Top point: FirePoint(frp=1475.5, coords=12 15' 31.86'' S 57 10' 58.728'' W, instrument=VIIRS)
-Points within distance=10 km, time=30 days: 110
+110 points within distance=10 km, time= +-30 days:
 FirePoint(frp=8.3, coords=12 16' 52.5'' S 57 9' 56.592'' W, instrument=VIIRS)
 FirePoint(frp=8.8, coords=12 17' 26.988'' S 57 10' 28.488'' W, instrument=VIIRS)
 FirePoint(frp=9.2, coords=12 17' 20.832'' S 57 9' 52.668'' W, instrument=VIIRS)
@@ -909,7 +909,7 @@ FirePoint(frp=1.3, coords=12 17' 41.316'' S 57 10' 23.592'' W, instrument=VIIRS)
 FirePoint(frp=1.6, coords=12 17' 38.904'' S 57 10' 36.192'' W, instrument=VIIRS)
 
 Top point: FirePoint(frp=1475.5, coords=12 15' 29.916'' S 57 10' 45.264'' W, instrument=VIIRS)
-Points within distance=10 km, time=30 days: 109
+109 points within distance=10 km, time= +-30 days:
 FirePoint(frp=8.3, coords=12 16' 52.5'' S 57 9' 56.592'' W, instrument=VIIRS)
 FirePoint(frp=8.8, coords=12 17' 26.988'' S 57 10' 28.488'' W, instrument=VIIRS)
 FirePoint(frp=9.2, coords=12 17' 20.832'' S 57 9' 52.668'' W, instrument=VIIRS)
@@ -1021,7 +1021,7 @@ FirePoint(frp=1.3, coords=12 17' 41.316'' S 57 10' 23.592'' W, instrument=VIIRS)
 FirePoint(frp=1.6, coords=12 17' 38.904'' S 57 10' 36.192'' W, instrument=VIIRS)
 
 Top point: FirePoint(frp=1583.4, coords=12 44' 45.132'' S 52 0' 35.748'' W, instrument=VIIRS)
-Points within distance=10 km, time=30 days: 44
+44 points within distance=10 km, time= +-30 days:
 FirePoint(frp=52.2, coords=12 46' 39'' S 52 4' 11.1'' W, instrument=VIIRS)
 FirePoint(frp=42.0, coords=12 46' 37.092'' S 52 3' 56.088'' W, instrument=VIIRS)
 FirePoint(frp=74.1, coords=12 46' 36.336'' S 52 4' 5.628'' W, instrument=VIIRS)
@@ -1068,7 +1068,7 @@ FirePoint(frp=6.6, coords=12 48' 23.22'' S 52 1' 1.524'' W, instrument=VIIRS)
 FirePoint(frp=7.0, coords=12 44' 42.252'' S 52 0' 45.468'' W, instrument=VIIRS)
 
 Top point: FirePoint(frp=1589.3, coords=12 14' 45.348'' S 57 5' 44.376'' W, instrument=VIIRS)
-Points within distance=10 km, time=30 days: 211
+211 points within distance=10 km, time= +-30 days:
 FirePoint(frp=13.0, coords=12 15' 47.592'' S 57 10' 47.964'' W, instrument=VIIRS)
 FirePoint(frp=11.5, coords=12 13' 21.36'' S 57 6' 36.756'' W, instrument=VIIRS)
 FirePoint(frp=27.4, coords=12 13' 39.324'' S 57 6' 51.768'' W, instrument=VIIRS)
@@ -1282,7 +1282,7 @@ FirePoint(frp=11.8, coords=12 14' 10.212'' S 57 6' 49.032'' W, instrument=VIIRS)
 FirePoint(frp=4.4, coords=12 17' 40.308'' S 57 1' 29.028'' W, instrument=VIIRS)
 
 Top point: FirePoint(frp=1626.3, coords=8 10' 44.976'' S 62 53' 12.228'' W, instrument=VIIRS)
-Points within distance=10 km, time=30 days: 179
+179 points within distance=10 km, time= +-30 days:
 FirePoint(frp=1.0, coords=8 10' 33.204'' S 62 52' 14.16'' W, instrument=VIIRS)
 FirePoint(frp=0.8, coords=8 10' 35.184'' S 62 52' 1.56'' W, instrument=VIIRS)
 FirePoint(frp=0.8, coords=8 10' 37.164'' S 62 51' 48.96'' W, instrument=VIIRS)
@@ -1464,7 +1464,7 @@ FirePoint(frp=5.5, coords=8 11' 19.968'' S 62 52' 21.036'' W, instrument=VIIRS)
 FirePoint(frp=4.8, coords=8 12' 40.824'' S 62 56' 32.208'' W, instrument=VIIRS)
 
 Top point: FirePoint(frp=1626.3, coords=8 10' 59.412'' S 62 53' 10.212'' W, instrument=VIIRS)
-Points within distance=10 km, time=30 days: 179
+179 points within distance=10 km, time= +-30 days:
 FirePoint(frp=1.0, coords=8 10' 33.204'' S 62 52' 14.16'' W, instrument=VIIRS)
 FirePoint(frp=0.8, coords=8 10' 35.184'' S 62 52' 1.56'' W, instrument=VIIRS)
 FirePoint(frp=0.8, coords=8 10' 37.164'' S 62 51' 48.96'' W, instrument=VIIRS)
@@ -1646,7 +1646,7 @@ FirePoint(frp=5.5, coords=8 11' 19.968'' S 62 52' 21.036'' W, instrument=VIIRS)
 FirePoint(frp=4.8, coords=8 12' 40.824'' S 62 56' 32.208'' W, instrument=VIIRS)
 
 Top point: FirePoint(frp=1725.1, coords=2 5' 34.332'' N 61 13' 49.368'' W, instrument=VIIRS)
-Points within distance=10 km, time=30 days: 22
+22 points within distance=10 km, time= +-30 days:
 FirePoint(frp=0.7, coords=2 9' 30.096'' N 61 12' 23.148'' W, instrument=VIIRS)
 FirePoint(frp=9.1, coords=2 9' 58.932'' N 61 13' 14.16'' W, instrument=VIIRS)
 FirePoint(frp=9.9, coords=2 10' 0.66'' N 61 13' 2.748'' W, instrument=VIIRS)
@@ -1671,7 +1671,7 @@ FirePoint(frp=0.6, coords=2 6' 9.036'' N 61 18' 5.688'' W, instrument=VIIRS)
 FirePoint(frp=1.3, coords=2 6' 19.908'' N 61 15' 53.352'' W, instrument=VIIRS)
 
 Top point: FirePoint(frp=1920.2, coords=12 15' 27.972'' S 57 10' 31.908'' W, instrument=VIIRS)
-Points within distance=10 km, time=30 days: 109
+109 points within distance=10 km, time= +-30 days:
 FirePoint(frp=8.3, coords=12 16' 52.5'' S 57 9' 56.592'' W, instrument=VIIRS)
 FirePoint(frp=8.8, coords=12 17' 26.988'' S 57 10' 28.488'' W, instrument=VIIRS)
 FirePoint(frp=9.2, coords=12 17' 20.832'' S 57 9' 52.668'' W, instrument=VIIRS)
