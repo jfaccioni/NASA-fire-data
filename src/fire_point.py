@@ -26,7 +26,7 @@ class FirePoint:
 
     def __repr__(self) -> str:
         """String representation of a FirePoint instance"""
-        return f'FirePoint(frp={self.frp}, coords={self.coords}, instrument={self.instrument})'
+        return f'FirePoint(frp={self.frp}, date={self.date}, coords={self.coords}, instrument={self.instrument})'
 
     @classmethod
     def from_dataset_row(cls, row: pd.Series) -> FirePoint:
@@ -102,4 +102,5 @@ class FirePoint:
 
     def as_csv_row(self, is_top_point: bool) -> str:
         """Returns a csv row representation of the FirePoint instance"""
-        return f'{self.frp},{self.latitude},{self.longitude},{self.instrument},{is_top_point}'
+        day, time = str(self.date).split()
+        return f'{self.frp},{day},{time},{self.latitude},{self.longitude},{self.instrument},{is_top_point}'

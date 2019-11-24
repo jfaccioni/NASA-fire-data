@@ -143,7 +143,7 @@ def analysis_loop(df: pd.DataFrame, output_dir: str, analyse_column: str, top_ro
 
 def add_header(csvfile: TextIOWrapper) -> None:
     """Adds the first line (table header) to the output csv file"""
-    csvfile.write('frp,latitude,longitude,instrument,is_top_point\n')
+    csvfile.write('frp,day,time,latitude,longitude,instrument,is_top_point\n')
 
 
 def yield_top_points(df: pd.DataFrame, column_name: str, n: int) -> Generator[FirePoint, None, None]:
