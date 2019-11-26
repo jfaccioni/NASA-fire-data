@@ -13,5 +13,7 @@ seaborn = "*"
 nasa-fire-data = {editable = true,path = "."}
 geopy = "*"
 ipython = "*"
+geopandas = "*"
+geoplot = "*"
 
 [requires]

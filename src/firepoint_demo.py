@@ -5,11 +5,14 @@ from geopy import distance
 
 from src.fire_point import FirePoint
 
+instrument = 'VIIRS'
+INPUT_FILE = f'local/{instrument}.csv'
 
-def firepoint_demo(instrument: str = 'VIIRS'):
+
+def firepoint_demo(input_file: str) -> None:
     """FirePoint class demo"""
     print('loading data...')
-    viirs = pd.read_csv(f'local/{instrument}.csv', low_memory=False)
+    viirs = pd.read_csv(input_file, low_memory=False)
     print('Done loading!')
     points = {1: None, 2: None}
     for point_number in points:
@@ -33,4 +36,4 @@ def firepoint_demo(instrument: str = 'VIIRS'):
 
 
 if __name__ == '__main__':
-    firepoint_demo()
+    firepoint_demo(input_file=INPUT_FILE)
