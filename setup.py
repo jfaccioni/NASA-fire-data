@@ -3,5 +3,5 @@ from setuptools import setup, find_packages
 setup(
     name='NASA fire data',
     version='0.1.0',
-    packages=find_packages()
+    packages=find_packages(), install_requires=['pandas', 'geopy', 'geopandas', 'matplotlib', 'numpy', 'seaborn']
 )

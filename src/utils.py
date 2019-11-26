@@ -1,7 +1,12 @@
+from __future__ import annotations
+
 from contextlib import contextmanager
-from typing import Any, Callable
+from typing import Any, Callable, Optional, TYPE_CHECKING
 
 from pandas import options
+
+if TYPE_CHECKING:
+    from io import TextIOWrapper
 
 
 @contextmanager
