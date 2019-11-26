@@ -13,6 +13,7 @@ local/
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
+.idea/NASA fire data.iml
 
 # Generated files
 .idea/**/contentModel.xml
