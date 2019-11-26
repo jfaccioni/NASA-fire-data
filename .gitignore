@@ -25,6 +25,7 @@ local/
 .idea/**/dynamic.xml
 .idea/**/uiDesigner.xml
 .idea/**/dbnavigator.xml
+.idea/NASA fire data.iml
 
 # Gradle
 .idea/**/gradle.xml
@@ -35,9 +36,9 @@ local/
 # since they will be recreated, and may cause churn.  Uncomment if using
 # auto-import.
 # .idea/modules.xml
-.idea/*.iml
+# .idea/*.iml
 # .idea/modules
-*.iml
+# *.iml
 # *.ipr
 
 # CMake
