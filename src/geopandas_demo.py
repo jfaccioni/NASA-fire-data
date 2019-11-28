@@ -18,8 +18,8 @@ def geopandas_demo(input_file: str) -> None:
     gdf = get_geodataframe(input_file=input_file)
     gdf['datetime'] = gdf['date'] + ' ' + gdf['time']
     draw_brazil_axes(ax=ax)
-    for top_slice in yield_top_point_slices(data=gdf):
-        sns.relplot(figure=fig, ax=ax, data=top_slice, x='longitude', y='latitude', hue='datetime', palette='Blues_d')
+    # for top_slice in yield_top_point_slices(data=gdf):
+    sns.relplot(figure=fig, ax=ax, data=gdf, x='longitude', y='latitude', hue='datetime', palette='Blues_d')
     plt.show()
 
 
