@@ -100,7 +100,7 @@ class FirePoint:
         time_between_points = abs(self.date - other.date)  # in days
         return time_between_points.total_seconds() < (time_delta * 3600 * 24)
 
-    def as_csv_row(self, is_top_point: bool) -> str:
+    def as_csv_row(self, is_top_point: bool, group_id: int) -> str:
         """Returns a csv row representation of the FirePoint instance"""
         day, time = str(self.date).split()
-        return f'{self.frp},{day},{time},{self.latitude},{self.longitude},{self.instrument},{is_top_point}'
+        return f'{self.frp},{day},{time},{self.latitude},{self.longitude},{self.instrument},{is_top_point},{group_id}'

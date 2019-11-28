@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from calendar import month_abbr
 from functools import lru_cache
-from typing import Dict, Generator, List, Optional, TYPE_CHECKING
+from typing import Dict, Generator, List, Optional, TYPE_CHECKING, Tuple
 from zipfile import ZipFile
 
 import matplotlib.pyplot as plt
@@ -154,27 +154,28 @@ def analysis_loop(df: pd.DataFrame, output_dir: str, analyse_column: str, top_ro
             conditional_open(csv_path, 'w', condition=analyse_to_csv) as csvfile:
         if csvfile is not None:
             add_header(csvfile=csvfile)
-        for top_point in yield_top_points(df=df, column_name=analyse_column, n=top_row_number):
+        for index, top_point in yield_top_points(df=df, column_name=analyse_column, n=top_row_number):
+            group_id = int(index) + 1
             close_points = get_close_points(df=df, top_point=top_point, distance_cutoff=distance_cutoff,
                                             temporal_cutoff=temporal_cutoff)
             if analyse_to_stdout:
                 to_stdout(top_point=top_point, close_points=close_points, distance_cutoff=distance_cutoff,
-                          temporal_cutoff=temporal_cutoff)
+                          temporal_cutoff=temporal_cutoff, group_id=group_id)
             to_log(logfile=logfile, top_point=top_point, close_points=close_points, distance_cutoff=distance_cutoff,
-                   temporal_cutoff=temporal_cutoff)
-            to_csv(csvfile=csvfile, top_point=top_point, close_points=close_points)
+                   temporal_cutoff=temporal_cutoff, group_id=group_id)
+            to_csv(csvfile=csvfile, top_point=top_point, close_points=close_points, group_id=group_id)
 
 
 def add_header(csvfile: TextIOWrapper) -> None:
     """Adds the first line (table header) to the output csv file"""
-    csvfile.write('frp,day,time,latitude,longitude,instrument,is_top_point\n')
+    csvfile.write('frp,day,time,latitude,longitude,instrument,is_top_point,group_id\n')
 
 
-def yield_top_points(df: pd.DataFrame, column_name: str, n: int) -> Generator[FirePoint, None, None]:
+def yield_top_points(df: pd.DataFrame, column_name: str, n: int) -> Generator[Tuple[int, FirePoint], None, None]:
     """Yields the top k rows from data as FirePoint instances, regarding values in the column_name column"""
     top_df = df.sort_values(by=column_name).tail(n)
-    for _, row in top_df.iterrows():
-        yield FirePoint.from_dataset_row(row=row)
+    for index, row in top_df.iterrows():
+        yield index, FirePoint.from_dataset_row(row=row)
 
 
 def get_close_points(df: pd.DataFrame, top_point: FirePoint, distance_cutoff: float,
@@ -188,9 +189,11 @@ def get_close_points(df: pd.DataFrame, top_point: FirePoint, distance_cutoff: fl
     return close_points
 
 
-def to_stdout(top_point: FirePoint, close_points: List, distance_cutoff: float, temporal_cutoff: float) -> None:
+def to_stdout(top_point: FirePoint, close_points: List, distance_cutoff: float, temporal_cutoff: float,
+              group_id: int) -> None:
     """Outputs information for FirePoint and its close points to standard output"""
     print(f'Top point: {top_point}')
+    print(f'group_id: {group_id}')
     print(f'{len(close_points)} points within distance={distance_cutoff} km, time= +-{temporal_cutoff} days:')
     for point in close_points:
         print(point)
@@ -198,12 +201,14 @@ def to_stdout(top_point: FirePoint, close_points: List, distance_cutoff: float, 
 
 
 def to_log(logfile: Optional[TextIOWrapper], top_point: FirePoint, close_points: List[FirePoint],
-           distance_cutoff: float, temporal_cutoff: float) -> None:
+           distance_cutoff: float, temporal_cutoff: float, group_id: int) -> None:
     """Outputs information for FirePoint and its close points to log file.
     Returns early if the user chose not to do so"""
     if logfile is None:
         return
     logfile.write(f'Top point: {top_point}')
+    logfile.write('\n')
+    logfile.write(f'group_id: {group_id}')
     logfile.write('\n')
     logfile.write(f'{len(close_points)} points within distance={distance_cutoff} km, time= +-{temporal_cutoff} days:')
     logfile.write('\n')
@@ -213,15 +218,16 @@ def to_log(logfile: Optional[TextIOWrapper], top_point: FirePoint, close_points:
     logfile.write('\n')
 
 
-def to_csv(csvfile: Optional[TextIOWrapper], top_point: FirePoint, close_points: List[FirePoint]) -> None:
+def to_csv(csvfile: Optional[TextIOWrapper], top_point: FirePoint, close_points: List[FirePoint],
+           group_id: int) -> None:
     """Outputs information for FirePoint and its close points to csv file.
     Returns early if the user chose not to do so"""
     if csvfile is None:
         return
-    csvfile.write(top_point.as_csv_row(is_top_point=True))
+    csvfile.write(top_point.as_csv_row(is_top_point=True, group_id=group_id))
     csvfile.write('\n')
     for point in close_points:
-        csvfile.write(point.as_csv_row(is_top_point=False))
+        csvfile.write(point.as_csv_row(is_top_point=False, group_id=group_id))
         csvfile.write('\n')
 
 
