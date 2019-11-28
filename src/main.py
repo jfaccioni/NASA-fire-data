@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from calendar import month_abbr
+from functools import lru_cache
 from typing import Dict, Generator, List, Optional, TYPE_CHECKING
 from zipfile import ZipFile
 
@@ -19,11 +20,17 @@ if TYPE_CHECKING:
 
 
 def main(input_dir: str, output_dir: str, percentile_filter: bool, percentile_column: str, cutoff_percentile: float,
-         value_filter: bool, value_column: str, cutoff_value: float, analyse_column: str, top_row_number: int,
-         distance_cutoff: float, temporal_cutoff: float, analyse_to_stdout: bool, analyse_to_log: bool,
-         analyse_to_csv: bool, plot_data: bool, save_data: bool) -> None:
+         value_filter: bool, filter_type: str, value_column: str, cutoff_value: float, analyse_column: str,
+         top_row_number: int, distance_cutoff: float, temporal_cutoff: float, analyse_to_stdout: bool,
+         analyse_to_log: bool, log_name: Optional[str], analyse_to_csv: bool, csv_name: Optional[str], plot_data: bool,
+         save_data: bool) -> None:
     """Main function of NASA fire data module.
     Parameters are read from the SETTINGS dictionary in the settings.py file"""
+    filter_func = {
+        'equal': filter_dataset_by_equal_value,
+        'below': filter_dataset_by_value_below,
+        'above': filter_dataset_by_value_above
+    }[filter_type]
     # Loads input data
     print('loading all data...')
     dataset = load_dataset(input_dir=input_dir)
@@ -34,8 +41,8 @@ def main(input_dir: str, output_dir: str, percentile_filter: bool, percentile_co
         print(f'Adding date columns to dataset {name}...')
         add_dates(df=df)
         if value_filter is True:
-            print(f'filtering dataset {name} by {value_column} > {cutoff_value} ...')
-            df = filter_dataset_by_value(df=df, value_column=value_column, cutoff_value=cutoff_value)
+            print(f'filtering dataset {name} by {value_column} {filter_type} {cutoff_value} ...')
+            df = filter_func(df=df, value_column=value_column, cutoff_value=cutoff_value)
         if percentile_filter is True:
             print(f'filtering dataset {name} by {percentile_column} > {cutoff_percentile} percentile...')
             df = filter_dataset_by_percentile(df=df, percentile_column=percentile_column,
@@ -44,8 +51,8 @@ def main(input_dir: str, output_dir: str, percentile_filter: bool, percentile_co
             print(f'analysing top rows for dataset {name}...')
             analysis_loop(df=df, output_dir=output_dir, analyse_column=analyse_column, top_row_number=top_row_number,
                           distance_cutoff=distance_cutoff, temporal_cutoff=temporal_cutoff,
-                          analyse_to_stdout=analyse_to_stdout, analyse_to_log=analyse_to_log,
-                          analyse_to_csv=analyse_to_csv)
+                          analyse_to_stdout=analyse_to_stdout, analyse_to_log=analyse_to_log, log_name=log_name,
+                          analyse_to_csv=analyse_to_csv, csv_name=csv_name)
         if plot_data is True:
             print(f'plotting dataset {name}...')
             plot_dataset(df=df, name=name)
@@ -57,6 +64,7 @@ def main(input_dir: str, output_dir: str, percentile_filter: bool, percentile_co
     plt.show()
 
 
+@lru_cache
 def load_dataset(input_dir: str) -> Dict[str, pd.DataFrame]:
     """Loads dataset from zip files. Returns a dictionary in the format {instrument name: pandas DataFrame}"""
     dataset = {}
@@ -68,6 +76,7 @@ def load_dataset(input_dir: str) -> Dict[str, pd.DataFrame]:
     return dataset
 
 
+@lru_cache
 def load_csvs_from_zip_file(zip_file: ZipFile) -> pd.DataFrame:
     """Reads data from all csv files inside the input zip file and returns it as a concatenated pandas DataFrame.
     This is necessary because, for each instrument, there are archive csv files (more than 3 months ago) and
@@ -105,7 +114,17 @@ def add_month_names(df: pd.DataFrame, date_col: str) -> None:
     df['month_name'] = df[date_col].apply(lambda x: month_abbr[int(x.split('-')[1])])
 
 
-def filter_dataset_by_value(df: pd.DataFrame, value_column: str, cutoff_value: float) -> pd.DataFrame:
+def filter_dataset_by_equal_value(df: pd.DataFrame, value_column: str, cutoff_value: float) -> pd.DataFrame:
+    """Filters a DataFrame by selecting rows whose values in the column_name column are equal to the value_cutoff"""
+    return df.loc[df[value_column] == cutoff_value]
+
+
+def filter_dataset_by_value_below(df: pd.DataFrame, value_column: str, cutoff_value: float) -> pd.DataFrame:
+    """Filters a DataFrame by selecting rows whose values in the column_name column are below the value_cutoff"""
+    return df.loc[df[value_column] < cutoff_value]
+
+
+def filter_dataset_by_value_above(df: pd.DataFrame, value_column: str, cutoff_value: float) -> pd.DataFrame:
     """Filters a DataFrame by selecting rows whose values in the column_name column are above the value_cutoff"""
     return df.loc[df[value_column] > cutoff_value]
 
@@ -119,13 +138,18 @@ def filter_dataset_by_percentile(df: pd.DataFrame, percentile_column: str, cutof
 
 # noinspection PyTypeChecker
 def analysis_loop(df: pd.DataFrame, output_dir: str, analyse_column: str, top_row_number: int, distance_cutoff: float,
-                  temporal_cutoff: float, analyse_to_stdout: bool, analyse_to_log: bool, analyse_to_csv: bool) -> None:
+                  temporal_cutoff: float, analyse_to_stdout: bool, analyse_to_log: bool, log_name: Optional[str],
+                  analyse_to_csv: bool, csv_name: Optional[str]) -> None:
     """Main analysis loop"""
-    base_results_path = os.path.join(output_dir, 'results')
+    base_results_path = os.path.join(output_dir, 'batch_results')  # TODO: remove this once batch is finished
     if not os.path.exists(base_results_path):
         os.mkdir(base_results_path)
-    log_path = os.path.join(base_results_path, 'log.txt')
-    csv_path = os.path.join(base_results_path, 'firepoints.csv')
+    if log_name is None:
+        log_name = 'log.txt'
+    if csv_name is None:
+        csv_name = 'firepoints.csv'
+    log_path = os.path.join(base_results_path, log_name)
+    csv_path = os.path.join(base_results_path, csv_name)
     with conditional_open(log_path, 'w', condition=analyse_to_log) as logfile, \
             conditional_open(csv_path, 'w', condition=analyse_to_csv) as csvfile:
         if csvfile is not None:
