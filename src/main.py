@@ -64,7 +64,7 @@ def main(input_dir: str, output_dir: str, percentile_filter: bool, percentile_co
     plt.show()
 
 
-@lru_cache
+@lru_cache(maxsize=32)
 def load_dataset(input_dir: str) -> Dict[str, pd.DataFrame]:
     """Loads dataset from zip files. Returns a dictionary in the format {instrument name: pandas DataFrame}"""
     dataset = {}
@@ -76,7 +76,7 @@ def load_dataset(input_dir: str) -> Dict[str, pd.DataFrame]:
     return dataset
 
 
-@lru_cache
+@lru_cache(maxsize=32)
 def load_csvs_from_zip_file(zip_file: ZipFile) -> pd.DataFrame:
     """Reads data from all csv files inside the input zip file and returns it as a concatenated pandas DataFrame.
     This is necessary because, for each instrument, there are archive csv files (more than 3 months ago) and
