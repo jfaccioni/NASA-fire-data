@@ -49,9 +49,9 @@ def main(input_dir: str, output_dir: str, filter_value: float, top_frp_rows: int
     print(f'selecting top FRP points...')
     for instrument in ('MODIS', 'VIIRS'):
         instrument_gdf = filter_by_instrument(gdf=gdf, instrument=instrument)
-        analyse_dataset(gdf=instrument_gdf, output_dir=output_dir, top_frp_rows=top_frp_rows,
-                        distance_cutoff=distance_cutoff, temporal_cutoff=temporal_cutoff, filter_value=filter_value,
-                        instrument=instrument)
+        select_top_frp_points(gdf=instrument_gdf, output_dir=output_dir, top_frp_rows=top_frp_rows,
+                              distance_cutoff=distance_cutoff, temporal_cutoff=temporal_cutoff,
+                              filter_value=filter_value, instrument=instrument)
 
 
 def load_dataset(input_dir: str) -> pd.DataFrame:
@@ -135,15 +135,18 @@ def filter_by_instrument(gdf: GeoDataFrame, instrument: str) -> GeoDataFrame:
     return gdf.loc[gdf['instrument'] == instrument]
 
 
-def analyse_dataset(gdf: GeoDataFrame, output_dir: str, top_frp_rows: int, distance_cutoff: float,
-                    temporal_cutoff: float, filter_value: float, instrument: str) -> None:
+@ignore_pandas_warning  # ignores SettingWithCopyWarning
+def select_top_frp_points(gdf: GeoDataFrame, output_dir: str, top_frp_rows: int, distance_cutoff: float,
+                          temporal_cutoff: float, filter_value: float, instrument: str) -> None:
     """Selects the top FRP points and saves to an output csv file"""
-    csv_path = os.path.join(output_dir, f'{instrument}_{filter_value}_firepoints.csv')
     for index, top_point in enumerate(yield_top_n_points(gdf=gdf, column_name='frp', n=top_frp_rows), 1):
+        group_id = '%03d' % index
+        print(f'selecting top FRP point number {group_id}...')
         dist_subset = apply_distance_cutoff(gdf=gdf, top_point=top_point, distance_cutoff=distance_cutoff)
         time_subset = apply_temporal_cutoff(gdf=dist_subset, top_point=top_point, temporal_cutoff=temporal_cutoff)
         time_subset.reset_index(inplace=True)
         append_series_to_top_of_dataframe(df=time_subset, series=top_point)
+        csv_path = os.path.join(output_dir, f'{instrument}_{filter_value}_firepoints_{group_id}.csv')
         time_subset.to_csv(csv_path)
 
 
@@ -170,7 +173,8 @@ def km_to_degrees(km: float) -> float:
 def apply_temporal_cutoff(gdf: GeoDataFrame, top_point: pd.Series, temporal_cutoff: float) -> GeoDataFrame:
     """Returns a GeoDataFrame of points inside top_point, considering the distance cutoff argument"""
     delta = days_to_seconds(days=temporal_cutoff)
-    return gdf.loc[abs(gdf['datetime'] - top_point['datetime']) <= delta]
+    seconds_delta_series = (gdf['datetime'] - top_point['datetime']).apply(abs).apply(lambda x: x.total_seconds())
+    return gdf.loc[seconds_delta_series <= delta]
 
 
 def days_to_seconds(days: float) -> float:
